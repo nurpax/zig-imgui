@@ -72,6 +72,10 @@ fn linkVulkan(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
 
 fn linkSokol(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
     _ = target;
+
+    exe.addIncludePath("zig-imgui");
+    exe.addIncludePath("sokol");
+
     const csources = [_][]const u8{
         "sokol/c/sokol_app.c",
         "sokol/c/sokol_gfx.c",
@@ -82,6 +86,7 @@ fn linkSokol(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
         "sokol/c/sokol_shape.c",
         "sokol/c/sokol_log.c",
         "sokol/c/sokol_imgui.cpp",
+        "sokol/imgui_wrapper.c",
     };
     //const backend = if (lib.target.isDarwin()) .metal else if (lib.target.isWindows()) .d3d11 else .gl;
     const backend = .d3d11;
