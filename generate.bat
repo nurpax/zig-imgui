@@ -1,7 +1,7 @@
 @echo off
 
 pushd "%~dp0"
-git submodule update --init --recursive
+REM git submodule update --init --recursive
 popd
 
 where gcc || goto NO_GCC
@@ -20,7 +20,7 @@ where python || goto NO_PYTHON
 
 :PYTHON_GENERATE
 	@echo Generating Zig Bindings...
-	python "%~dp0\generate.py"
+	python3 "%~dp0\generate.py"
 
 :VENDOR_IMGUI
 	pushd "%~dp0"

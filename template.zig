@@ -10,7 +10,7 @@ const imgui = @This();
 
 pub const DrawCallback_ResetRenderState = @intToPtr(DrawCallback, ~@as(usize, 3));
 
-pub const VERSION = "1.88";
+pub const VERSION = "1.89.4";
 pub fn CHECKVERSION() void {
     if (builtin.mode != .ReleaseFast) {
         assert(raw.igDebugCheckVersionAndDataLayout(VERSION, @sizeOf(IO), @sizeOf(Style), @sizeOf(Vec2), @sizeOf(Vec4), @sizeOf(DrawVert), @sizeOf(DrawIdx)));
@@ -251,7 +251,10 @@ pub fn Vector(comptime T: type) type {
                 var it = start;
                 var end_it = end;
                 const data = self.Data.?;
-                while (end_it < len) : ({ it += 1; end_it += 1; }) {
+                while (end_it < len) : ({
+                    it += 1;
+                    end_it += 1;
+                }) {
                     data[it] = data[end_it];
                 }
             }
@@ -271,7 +274,7 @@ pub fn Vector(comptime T: type) type {
             if (index < self.Size) {
                 var it = self.Size;
                 while (it > index) : (it -= 1) {
-                    data[it] = data[it-1];
+                    data[it] = data[it - 1];
                 }
             }
             data[index] = v;
@@ -284,7 +287,7 @@ pub fn Vector(comptime T: type) type {
             return false;
         }
         pub fn find(self: @This(), v: T) ?u32 {
-            return for (self.items()) |*it, i| {
+            return for (self.items(), 0..) |*it, i| {
                 if (imgui.eql(T, v, it.*)) break @intCast(u32, i);
             } else null;
         }
@@ -318,7 +321,7 @@ pub fn Vector(comptime T: type) type {
 pub const Vec2 = extern struct {
     x: f32 = 0,
     y: f32 = 0,
-    
+
     pub fn init(x: f32, y: f32) Vec4 {
         return .{ .x = x, .y = y };
     }
@@ -339,10 +342,7 @@ pub const Vec4 = extern struct {
     }
 
     pub fn eql(self: Vec4, other: Vec4) bool {
-        return self.x == other.x
-            and self.y == other.y
-            and self.z == other.z
-            and self.w == other.w;
+        return self.x == other.x and self.y == other.y and self.z == other.z and self.w == other.w;
     }
 };
 
@@ -390,8 +390,8 @@ pub const Color = extern struct {
     /// Convert an integer 0xaabbggrr to a floating point color
     pub fn initABGRPacked(value: u32) Color {
         return initRGBAUnorm(
-            @truncate(u8, value >>  0),
-            @truncate(u8, value >>  8),
+            @truncate(u8, value >> 0),
+            @truncate(u8, value >> 8),
             @truncate(u8, value >> 16),
             @truncate(u8, value >> 24),
         );
@@ -407,19 +407,22 @@ pub const Color = extern struct {
 };
 
 fn imguiZigAlloc(_: *anyopaque, len: usize, ptr_align: u29, len_align: u29, ret_addr: usize) std.mem.Allocator.Error![]u8 {
-    _ = len_align; _ = ret_addr;
+    _ = len_align;
+    _ = ret_addr;
     assert(ptr_align <= @alignOf(*anyopaque)); // Alignment larger than pointers is not supported
     return @ptrCast([*]u8, raw.igMemAlloc(len) orelse return error.OutOfMemory)[0..len];
 }
 fn imguiZigResize(_: *anyopaque, buf: []u8, buf_align: u29, new_len: usize, len_align: u29, ret_addr: usize) ?usize {
-    _ = len_align; _ = ret_addr;
+    _ = len_align;
+    _ = ret_addr;
     assert(buf_align <= @alignOf(*anyopaque)); // Alignment larger than pointers is not supported
     if (new_len > buf.len) return null;
     if (new_len == 0 and buf.len != 0) raw.igMemFree(buf.ptr);
     return new_len;
 }
 fn imguiZigFree(_: *anyopaque, buf: []u8, buf_align: u29, ret_addr: usize) void {
-    _ = buf_align; _ = ret_addr;
+    _ = buf_align;
+    _ = ret_addr;
     if (buf.len != 0) raw.igMemFree(buf.ptr);
 }
 

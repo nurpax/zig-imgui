@@ -81,6 +81,7 @@ fn linkSokol(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
         "sokol/c/sokol_debugtext.c",
         "sokol/c/sokol_shape.c",
         "sokol/c/sokol_log.c",
+        "sokol/c/sokol_imgui.cpp",
     };
     //const backend = if (lib.target.isDarwin()) .metal else if (lib.target.isWindows()) .d3d11 else .gl;
     const backend = .d3d11;

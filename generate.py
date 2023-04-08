@@ -501,6 +501,9 @@ class ZigData:
         valueConst = False
         if type.startswith('const'):
             valueConst = True
+            p = type[6:]
+            if p in ['ImVec2', 'ImVec4']:
+                valueConst = False
             type = type[6:]
         
         numPointers = 0

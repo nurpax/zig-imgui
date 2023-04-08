@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------
-//  clear.zig
-//
-//  Just clear the framebuffer with an animated color.
-//------------------------------------------------------------------------------
+const std = @import("std");
+const builtin = @import("builtin");
+
 const sokol = @import("sokol");
 const slog = sokol.log;
 const sg = sokol.gfx;
@@ -10,12 +8,25 @@ const sapp = sokol.app;
 const sgapp = sokol.app_gfx_glue;
 const print = @import("std").debug.print;
 
+const imgui = @import("imgui");
+const impl_sokol = @import("imgui_impl_sokol.zig");
+
 var pass_action: sg.PassAction = .{};
 
 export fn init() void {
     sg.setup(.{ .context = sgapp.context(), .logger = .{ .func = slog.func } });
     pass_action.colors[0] = .{ .action = .CLEAR, .value = .{ .r = 1, .g = 1, .b = 0, .a = 1 } };
     print("Backend: {}\n", .{sg.queryBackend()});
+
+    // Setup Dear ImGui context
+    imgui.CHECKVERSION();
+    _ = imgui.CreateContext();
+
+    // Setup Dear ImGui style
+    imgui.StyleColorsDark();
+
+    // Setup Platform/Renderer bindings
+    _ = impl_sokol.Init();
 }
 
 export fn frame() void {
@@ -28,6 +39,9 @@ export fn frame() void {
 
 export fn cleanup() void {
     sg.shutdown();
+
+    impl_sokol.Shutdown();
+    imgui.DestroyContext();
 }
 
 pub fn main() void {
