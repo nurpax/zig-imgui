@@ -287,7 +287,7 @@ pub fn Vector(comptime T: type) type {
             return false;
         }
         pub fn find(self: @This(), v: T) ?u32 {
-            return for (self.items()) |*it, i| {
+            return for (self.items(), 0..) |*it, i| {
                 if (imgui.eql(T, v, it.*)) break @intCast(u32, i);
             } else null;
         }
