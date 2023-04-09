@@ -81,7 +81,7 @@ pub fn main() !void {
     // Our state
     var show_demo_window = true;
     var show_another_window = false;
-    var clear_color = imgui.Vec4{ .x = 0.45, .y = 0.55, .z = 0.60, .w = 1.00 };
+    var clear_color = imgui.Vec4{ 0.45, 0.55, 0.60, 1.00 };
     var slider_value: f32 = 0;
     var counter: i32 = 0;
 
@@ -139,10 +139,10 @@ pub fn main() !void {
         glfw.glfwGetFramebufferSize(window, &display_w, &display_h);
         gl.glViewport(0, 0, display_w, display_h);
         gl.glClearColor(
-            clear_color.x * clear_color.w,
-            clear_color.y * clear_color.w,
-            clear_color.z * clear_color.w,
-            clear_color.w,
+            clear_color[0] * clear_color[3],
+            clear_color[1] * clear_color[3],
+            clear_color[2] * clear_color[3],
+            clear_color[3],
         );
         gl.glClear(gl.GL_COLOR_BUFFER_BIT);
         impl_gl3.RenderDrawData(imgui.GetDrawData());

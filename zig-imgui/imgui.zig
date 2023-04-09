@@ -318,33 +318,8 @@ pub fn Vector(comptime T: type) type {
     };
 }
 
-pub const Vec2 = extern struct {
-    x: f32 = 0,
-    y: f32 = 0,
-
-    pub fn init(x: f32, y: f32) Vec2 {
-        return .{ .x = x, .y = y };
-    }
-
-    pub fn eql(self: Vec2, other: Vec2) bool {
-        return self.x == other.x and self.y == other.y;
-    }
-};
-
-pub const Vec4 = extern struct {
-    x: f32 = 0,
-    y: f32 = 0,
-    z: f32 = 0,
-    w: f32 = 0,
-
-    pub fn init(x: f32, y: f32, z: f32, w: f32) Vec4 {
-        return .{ .x = x, .y = y, .z = z, .w = w };
-    }
-
-    pub fn eql(self: Vec4, other: Vec4) bool {
-        return self.x == other.x and self.y == other.y and self.z == other.z and self.w == other.w;
-    }
-};
+pub const Vec2 = @Vector(2, f32);
+pub const Vec4 = @Vector(4, f32);
 
 pub const Color = extern struct {
     Value: Vec4,
@@ -1684,7 +1659,6 @@ pub const Key = enum(i32) {
     ReservedForModShift = 649,
     ReservedForModAlt = 650,
     ReservedForModSuper = 651,
-
     //ImGuiMod_None = 0,
     ImGuiMod_Ctrl = 1 << 12,
     ImGuiMod_Shift = 1 << 13,
@@ -1834,9 +1808,9 @@ pub const DrawData = extern struct {
     TotalIdxCount: i32,
     TotalVtxCount: i32,
     CmdLists: ?[*]*DrawList,
-    DisplayPos: Vec2,
-    DisplaySize: Vec2,
-    FramebufferScale: Vec2,
+    DisplayPos: [2]f32,
+    DisplaySize: [2]f32,
+    FramebufferScale: [2]f32,
 
     /// Clear(self: *DrawData) void
     pub const Clear = raw.ImDrawData_Clear;
@@ -1907,13 +1881,13 @@ pub const DrawList = extern struct {
     /// AddImageExt(self: *DrawList, user_texture_id: TextureID, p_min: Vec2, p_max: Vec2, uv_min: Vec2, uv_max: Vec2, col: u32) void
     pub const AddImageExt = raw.ImDrawList_AddImage;
     pub inline fn AddImage(self: *DrawList, user_texture_id: TextureID, p_min: Vec2, p_max: Vec2) void {
-        return @This().AddImageExt(self, user_texture_id, p_min, p_max, .{ .x = 0, .y = 0 }, .{ .x = 1, .y = 1 }, 4294967295);
+        return @This().AddImageExt(self, user_texture_id, p_min, p_max, .{ 0, 0 }, .{ 1, 1 }, 4294967295);
     }
 
     /// AddImageQuadExt(self: *DrawList, user_texture_id: TextureID, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2, uv1: Vec2, uv2: Vec2, uv3: Vec2, uv4: Vec2, col: u32) void
     pub const AddImageQuadExt = raw.ImDrawList_AddImageQuad;
     pub inline fn AddImageQuad(self: *DrawList, user_texture_id: TextureID, p1: Vec2, p2: Vec2, p3: Vec2, p4: Vec2) void {
-        return @This().AddImageQuadExt(self, user_texture_id, p1, p2, p3, p4, .{ .x = 0, .y = 0 }, .{ .x = 1, .y = 0 }, .{ .x = 1, .y = 1 }, .{ .x = 0, .y = 1 }, 4294967295);
+        return @This().AddImageQuadExt(self, user_texture_id, p1, p2, p3, p4, .{ 0, 0 }, .{ 1, 0 }, .{ 1, 1 }, .{ 0, 1 }, 4294967295);
     }
 
     pub inline fn AddImageRoundedExt(self: *DrawList, user_texture_id: TextureID, p_min: Vec2, p_max: Vec2, uv_min: Vec2, uv_max: Vec2, col: u32, rounding: f32, flags: DrawFlags) void {
@@ -2167,8 +2141,8 @@ pub const DrawListSplitter = extern struct {
 };
 
 pub const DrawVert = extern struct {
-    pos: Vec2,
-    uv: Vec2,
+    pos: [2]f32,
+    uv: [2]f32,
     col: u32,
 };
 
@@ -2274,8 +2248,8 @@ pub const FontAtlas = extern struct {
     TexPixelsRGBA32: ?[*]u32,
     TexWidth: i32,
     TexHeight: i32,
-    TexUvScale: Vec2,
-    TexUvWhitePixel: Vec2,
+    TexUvScale: [2]f32,
+    TexUvWhitePixel: [2]f32,
     Fonts: Vector(?*Font),
     CustomRects: Vector(FontAtlasCustomRect),
     ConfigData: Vector(FontConfig),
@@ -2288,7 +2262,7 @@ pub const FontAtlas = extern struct {
     /// AddCustomRectFontGlyphExt(self: *FontAtlas, font: ?*Font, id: Wchar, width: i32, height: i32, advance_x: f32, offset: Vec2) i32
     pub const AddCustomRectFontGlyphExt = raw.ImFontAtlas_AddCustomRectFontGlyph;
     pub inline fn AddCustomRectFontGlyph(self: *FontAtlas, font: ?*Font, id: Wchar, width: i32, height: i32, advance_x: f32) i32 {
-        return @This().AddCustomRectFontGlyphExt(self, font, id, width, height, advance_x, .{ .x = 0, .y = 0 });
+        return @This().AddCustomRectFontGlyphExt(self, font, id, width, height, advance_x, .{ 0, 0 });
     }
 
     /// AddCustomRectRegular(self: *FontAtlas, width: i32, height: i32) i32
@@ -2432,8 +2406,8 @@ pub const FontConfig = extern struct {
     OversampleH: i32,
     OversampleV: i32,
     PixelSnapH: bool,
-    GlyphExtraSpacing: Vec2,
-    GlyphOffset: Vec2,
+    GlyphExtraSpacing: [2]f32,
+    GlyphOffset: [2]f32,
     GlyphRanges: ?[*:0]const Wchar,
     GlyphMinAdvanceX: f32,
     GlyphMaxAdvanceX: f32,
@@ -2503,7 +2477,7 @@ pub const FontGlyphRangesBuilder = extern struct {
 pub const IO = extern struct {
     ConfigFlags: ConfigFlags align(4),
     BackendFlags: BackendFlags align(4),
-    DisplaySize: Vec2,
+    DisplaySize: [2]f32,
     DeltaTime: f32,
     IniSavingRate: f32,
     IniFilename: ?[*:0]const u8,
@@ -2520,7 +2494,7 @@ pub const IO = extern struct {
     FontGlobalScale: f32,
     FontAllowUserScaling: bool,
     FontDefault: ?*Font,
-    DisplayFramebufferScale: Vec2,
+    DisplayFramebufferScale: [2]f32,
     MouseDrawCursor: bool,
     ConfigMacOSXBehaviors: bool,
     ConfigInputTrickleEventQueue: bool,
@@ -2555,12 +2529,12 @@ pub const IO = extern struct {
     MetricsRenderWindows: i32,
     MetricsActiveWindows: i32,
     MetricsActiveAllocations: i32,
-    MouseDelta: Vec2,
+    MouseDelta: [2]f32,
     KeyMap: [Key.COUNT]i32,
     KeysDown: [Key.COUNT]bool,
     NavInputs: [NavInput.COUNT]f32,
     Ctx: ?*Context,
-    MousePos: Vec2,
+    MousePos: [2]f32,
     MouseDown: [5]bool,
     MouseWheel: f32,
     MouseWheelH: f32,
@@ -2571,8 +2545,8 @@ pub const IO = extern struct {
     KeyMods: KeyChord,
     KeysData: [Key.KeysData_SIZE]KeyData,
     WantCaptureMouseUnlessPopupClose: bool,
-    MousePosPrev: Vec2,
-    MouseClickedPos: [5]Vec2,
+    MousePosPrev: [2]f32,
+    MouseClickedPos: [5][2]f32,
     MouseClickedTime: [5]f64,
     MouseClicked: [5]bool,
     MouseDoubleClicked: [5]bool,
@@ -2867,23 +2841,23 @@ pub const StoragePair = extern struct {
 pub const Style = extern struct {
     Alpha: f32,
     DisabledAlpha: f32,
-    WindowPadding: Vec2,
+    WindowPadding: [2]f32,
     WindowRounding: f32,
     WindowBorderSize: f32,
-    WindowMinSize: Vec2,
-    WindowTitleAlign: Vec2,
+    WindowMinSize: [2]f32,
+    WindowTitleAlign: [2]f32,
     WindowMenuButtonPosition: Dir,
     ChildRounding: f32,
     ChildBorderSize: f32,
     PopupRounding: f32,
     PopupBorderSize: f32,
-    FramePadding: Vec2,
+    FramePadding: [2]f32,
     FrameRounding: f32,
     FrameBorderSize: f32,
-    ItemSpacing: Vec2,
-    ItemInnerSpacing: Vec2,
-    CellPadding: Vec2,
-    TouchExtraPadding: Vec2,
+    ItemSpacing: [2]f32,
+    ItemInnerSpacing: [2]f32,
+    CellPadding: [2]f32,
+    TouchExtraPadding: [2]f32,
     IndentSpacing: f32,
     ColumnsMinSpacing: f32,
     ScrollbarSize: f32,
@@ -2895,20 +2869,20 @@ pub const Style = extern struct {
     TabBorderSize: f32,
     TabMinWidthForCloseButton: f32,
     ColorButtonPosition: Dir,
-    ButtonTextAlign: Vec2,
-    SelectableTextAlign: Vec2,
+    ButtonTextAlign: [2]f32,
+    SelectableTextAlign: [2]f32,
     SeparatorTextBorderSize: f32,
-    SeparatorTextAlign: Vec2,
-    SeparatorTextPadding: Vec2,
-    DisplayWindowPadding: Vec2,
-    DisplaySafeAreaPadding: Vec2,
+    SeparatorTextAlign: [2]f32,
+    SeparatorTextPadding: [2]f32,
+    DisplayWindowPadding: [2]f32,
+    DisplaySafeAreaPadding: [2]f32,
     MouseCursorScale: f32,
     AntiAliasedLines: bool,
     AntiAliasedLinesUseTex: bool,
     AntiAliasedFill: bool,
     CurveTessellationTol: f32,
     CircleTessellationMaxError: f32,
-    Colors: [Col.COUNT]Vec4,
+    Colors: [Col.COUNT][4]f32,
 
     /// init_ImGuiStyle() void
     pub const init_ImGuiStyle = raw.ImGuiStyle_ImGuiStyle;
@@ -3092,14 +3066,14 @@ pub inline fn BeginChild_StrExt(str_id: ?[*:0]const u8, size: Vec2, border: bool
     return raw.igBeginChild_Str(str_id, size, border, flags.toInt());
 }
 pub inline fn BeginChild_Str(str_id: ?[*:0]const u8) bool {
-    return @This().BeginChild_StrExt(str_id, .{ .x = 0, .y = 0 }, false, .{});
+    return @This().BeginChild_StrExt(str_id, .{ 0, 0 }, false, .{});
 }
 
 pub inline fn BeginChild_IDExt(id: ID, size: Vec2, border: bool, flags: WindowFlags) bool {
     return raw.igBeginChild_ID(id, size, border, flags.toInt());
 }
 pub inline fn BeginChild_ID(id: ID) bool {
-    return @This().BeginChild_IDExt(id, .{ .x = 0, .y = 0 }, false, .{});
+    return @This().BeginChild_IDExt(id, .{ 0, 0 }, false, .{});
 }
 
 pub inline fn BeginChildFrameExt(id: ID, size: Vec2, flags: WindowFlags) bool {
@@ -3138,7 +3112,7 @@ pub const BeginGroup = raw.igBeginGroup;
 /// BeginListBoxExt(label: ?[*:0]const u8, size: Vec2) bool
 pub const BeginListBoxExt = raw.igBeginListBox;
 pub inline fn BeginListBox(label: ?[*:0]const u8) bool {
-    return @This().BeginListBoxExt(label, .{ .x = 0, .y = 0 });
+    return @This().BeginListBoxExt(label, .{ 0, 0 });
 }
 
 /// BeginMainMenuBar() bool
@@ -3206,7 +3180,7 @@ pub inline fn BeginTableExt(str_id: ?[*:0]const u8, column: i32, flags: TableFla
     return raw.igBeginTable(str_id, column, flags.toInt(), outer_size, inner_width);
 }
 pub inline fn BeginTable(str_id: ?[*:0]const u8, column: i32) bool {
-    return @This().BeginTableExt(str_id, column, .{}, .{ .x = 0.0, .y = 0.0 }, 0.0);
+    return @This().BeginTableExt(str_id, column, .{}, .{ 0.0, 0.0 }, 0.0);
 }
 
 /// BeginTooltip() bool
@@ -3221,7 +3195,7 @@ pub const BulletText = raw.igBulletText;
 /// ButtonExt(label: ?[*:0]const u8, size: Vec2) bool
 pub const ButtonExt = raw.igButton;
 pub inline fn Button(label: ?[*:0]const u8) bool {
-    return @This().ButtonExt(label, .{ .x = 0, .y = 0 });
+    return @This().ButtonExt(label, .{ 0, 0 });
 }
 
 /// CalcItemWidth() f32
@@ -3266,7 +3240,7 @@ pub inline fn ColorButtonExt(desc_id: ?[*:0]const u8, col: Vec4, flags: ColorEdi
     return raw.igColorButton(desc_id, col, flags.toInt(), size);
 }
 pub inline fn ColorButton(desc_id: ?[*:0]const u8, col: Vec4) bool {
-    return @This().ColorButtonExt(desc_id, col, .{}, .{ .x = 0, .y = 0 });
+    return @This().ColorButtonExt(desc_id, col, .{}, .{ 0, 0 });
 }
 
 /// ColorConvertFloat4ToU32(in: Vec4) u32
@@ -3753,13 +3727,13 @@ pub const GetWindowWidth = raw.igGetWindowWidth;
 /// ImageExt(user_texture_id: TextureID, size: Vec2, uv0: Vec2, uv1: Vec2, tint_col: Vec4, border_col: Vec4) void
 pub const ImageExt = raw.igImage;
 pub inline fn Image(user_texture_id: TextureID, size: Vec2) void {
-    return @This().ImageExt(user_texture_id, size, .{ .x = 0, .y = 0 }, .{ .x = 1, .y = 1 }, .{ .x = 1, .y = 1, .z = 1, .w = 1 }, .{ .x = 0, .y = 0, .z = 0, .w = 0 });
+    return @This().ImageExt(user_texture_id, size, .{ 0, 0 }, .{ 1, 1 }, .{ 1, 1, 1, 1 }, .{ 0, 0, 0, 0 });
 }
 
 /// ImageButtonExt(str_id: ?[*:0]const u8, user_texture_id: TextureID, size: Vec2, uv0: Vec2, uv1: Vec2, bg_col: Vec4, tint_col: Vec4) bool
 pub const ImageButtonExt = raw.igImageButton;
 pub inline fn ImageButton(str_id: ?[*:0]const u8, user_texture_id: TextureID, size: Vec2) bool {
-    return @This().ImageButtonExt(str_id, user_texture_id, size, .{ .x = 0, .y = 0 }, .{ .x = 1, .y = 1 }, .{ .x = 0, .y = 0, .z = 0, .w = 0 }, .{ .x = 1, .y = 1, .z = 1, .w = 1 });
+    return @This().ImageButtonExt(str_id, user_texture_id, size, .{ 0, 0 }, .{ 1, 1 }, .{ 0, 0, 0, 0 }, .{ 1, 1, 1, 1 });
 }
 
 /// IndentExt(indent_w: f32) void
@@ -3856,7 +3830,7 @@ pub inline fn InputTextMultilineExt(label: ?[*:0]const u8, buf: ?[*]u8, buf_size
     return raw.igInputTextMultiline(label, buf, buf_size, size, flags.toInt(), callback, user_data);
 }
 pub inline fn InputTextMultiline(label: ?[*:0]const u8, buf: ?[*]u8, buf_size: usize) bool {
-    return @This().InputTextMultilineExt(label, buf, buf_size, .{ .x = 0, .y = 0 }, .{}, null, null);
+    return @This().InputTextMultilineExt(label, buf, buf_size, .{ 0, 0 }, .{}, null, null);
 }
 
 pub inline fn InputTextWithHintExt(label: ?[*:0]const u8, hint: ?[*:0]const u8, buf: ?[*]u8, buf_size: usize, flags: InputTextFlags, callback: InputTextCallback, user_data: ?*anyopaque) bool {
@@ -4102,25 +4076,25 @@ pub inline fn OpenPopupOnItemClick() void {
 /// PlotHistogram_FloatPtrExt(label: ?[*:0]const u8, values: *const f32, values_count: i32, values_offset: i32, overlay_text: ?[*:0]const u8, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) void
 pub const PlotHistogram_FloatPtrExt = raw.igPlotHistogram_FloatPtr;
 pub inline fn PlotHistogram_FloatPtr(label: ?[*:0]const u8, values: *const f32, values_count: i32) void {
-    return @This().PlotHistogram_FloatPtrExt(label, values, values_count, 0, null, FLT_MAX, FLT_MAX, .{ .x = 0, .y = 0 }, @sizeOf(f32));
+    return @This().PlotHistogram_FloatPtrExt(label, values, values_count, 0, null, FLT_MAX, FLT_MAX, .{ 0, 0 }, @sizeOf(f32));
 }
 
 /// PlotHistogram_FnFloatPtrExt(label: ?[*:0]const u8, values_getter: ?*const fn (data: ?*anyopaque, idx: i32) callconv(.C) f32, data: ?*anyopaque, values_count: i32, values_offset: i32, overlay_text: ?[*:0]const u8, scale_min: f32, scale_max: f32, graph_size: Vec2) void
 pub const PlotHistogram_FnFloatPtrExt = raw.igPlotHistogram_FnFloatPtr;
 pub inline fn PlotHistogram_FnFloatPtr(label: ?[*:0]const u8, values_getter: ?*const fn (data: ?*anyopaque, idx: i32) callconv(.C) f32, data: ?*anyopaque, values_count: i32) void {
-    return @This().PlotHistogram_FnFloatPtrExt(label, values_getter, data, values_count, 0, null, FLT_MAX, FLT_MAX, .{ .x = 0, .y = 0 });
+    return @This().PlotHistogram_FnFloatPtrExt(label, values_getter, data, values_count, 0, null, FLT_MAX, FLT_MAX, .{ 0, 0 });
 }
 
 /// PlotLines_FloatPtrExt(label: ?[*:0]const u8, values: *const f32, values_count: i32, values_offset: i32, overlay_text: ?[*:0]const u8, scale_min: f32, scale_max: f32, graph_size: Vec2, stride: i32) void
 pub const PlotLines_FloatPtrExt = raw.igPlotLines_FloatPtr;
 pub inline fn PlotLines_FloatPtr(label: ?[*:0]const u8, values: *const f32, values_count: i32) void {
-    return @This().PlotLines_FloatPtrExt(label, values, values_count, 0, null, FLT_MAX, FLT_MAX, .{ .x = 0, .y = 0 }, @sizeOf(f32));
+    return @This().PlotLines_FloatPtrExt(label, values, values_count, 0, null, FLT_MAX, FLT_MAX, .{ 0, 0 }, @sizeOf(f32));
 }
 
 /// PlotLines_FnFloatPtrExt(label: ?[*:0]const u8, values_getter: ?*const fn (data: ?*anyopaque, idx: i32) callconv(.C) f32, data: ?*anyopaque, values_count: i32, values_offset: i32, overlay_text: ?[*:0]const u8, scale_min: f32, scale_max: f32, graph_size: Vec2) void
 pub const PlotLines_FnFloatPtrExt = raw.igPlotLines_FnFloatPtr;
 pub inline fn PlotLines_FnFloatPtr(label: ?[*:0]const u8, values_getter: ?*const fn (data: ?*anyopaque, idx: i32) callconv(.C) f32, data: ?*anyopaque, values_count: i32) void {
-    return @This().PlotLines_FnFloatPtrExt(label, values_getter, data, values_count, 0, null, FLT_MAX, FLT_MAX, .{ .x = 0, .y = 0 });
+    return @This().PlotLines_FnFloatPtrExt(label, values_getter, data, values_count, 0, null, FLT_MAX, FLT_MAX, .{ 0, 0 });
 }
 
 /// PopButtonRepeat() void
@@ -4159,7 +4133,7 @@ pub const PopTextWrapPos = raw.igPopTextWrapPos;
 /// ProgressBarExt(fraction: f32, size_arg: Vec2, overlay: ?[*:0]const u8) void
 pub const ProgressBarExt = raw.igProgressBar;
 pub inline fn ProgressBar(fraction: f32) void {
-    return @This().ProgressBarExt(fraction, .{ .x = -FLT_MIN, .y = 0 }, null);
+    return @This().ProgressBarExt(fraction, .{ -FLT_MIN, 0 }, null);
 }
 
 /// PushButtonRepeat(repeat: bool) void
@@ -4241,14 +4215,14 @@ pub inline fn Selectable_BoolExt(label: ?[*:0]const u8, selected: bool, flags: S
     return raw.igSelectable_Bool(label, selected, flags.toInt(), size);
 }
 pub inline fn Selectable_Bool(label: ?[*:0]const u8) bool {
-    return @This().Selectable_BoolExt(label, false, .{}, .{ .x = 0, .y = 0 });
+    return @This().Selectable_BoolExt(label, false, .{}, .{ 0, 0 });
 }
 
 pub inline fn Selectable_BoolPtrExt(label: ?[*:0]const u8, p_selected: ?*bool, flags: SelectableFlags, size: Vec2) bool {
     return raw.igSelectable_BoolPtr(label, p_selected, flags.toInt(), size);
 }
 pub inline fn Selectable_BoolPtr(label: ?[*:0]const u8, p_selected: ?*bool) bool {
-    return @This().Selectable_BoolPtrExt(label, p_selected, .{}, .{ .x = 0, .y = 0 });
+    return @This().Selectable_BoolPtrExt(label, p_selected, .{}, .{ 0, 0 });
 }
 
 /// Separator() void
@@ -4349,7 +4323,7 @@ pub inline fn SetNextWindowPosExt(pos: Vec2, cond: CondFlags, pivot: Vec2) void 
     return raw.igSetNextWindowPos(pos, cond.toInt(), pivot);
 }
 pub inline fn SetNextWindowPos(pos: Vec2) void {
-    return @This().SetNextWindowPosExt(pos, .{}, .{ .x = 0, .y = 0 });
+    return @This().SetNextWindowPosExt(pos, .{}, .{ 0, 0 });
 }
 
 /// SetNextWindowScroll(scroll: Vec2) void

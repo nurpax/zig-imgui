@@ -401,17 +401,17 @@ class ZigData:
             params = defaultStr[defaultStr.index('(')+1 : defaultStr.index(')')]
             items = params.split(',')
             assert(len(items) == 2)
-            return '.{.x='+self.convertParamDefault(items[0], 'f32', context) + \
-                ',.y='+self.convertParamDefault(items[1], 'f32', context)+'}'
+            return '.{'+self.convertParamDefault(items[0], 'f32', context) + \
+                ', '+self.convertParamDefault(items[1], 'f32', context)+'}'
 
         if typeStr == 'Vec4' and defaultStr.startswith('ImVec4('):
             params = defaultStr[defaultStr.index('(')+1 : defaultStr.index(')')]
             items = params.split(',')
             assert(len(items) == 4)
-            return '.{.x='+self.convertParamDefault(items[0], 'f32', context) + \
-                ',.y='+self.convertParamDefault(items[1], 'f32', context) + \
-                ',.z='+self.convertParamDefault(items[2], 'f32', context) + \
-                ',.w='+self.convertParamDefault(items[3], 'f32', context)+'}'
+            return '.{ '+self.convertParamDefault(items[0], 'f32', context) + \
+                ', '+self.convertParamDefault(items[1], 'f32', context) + \
+                ', '+self.convertParamDefault(items[2], 'f32', context) + \
+                ', '+self.convertParamDefault(items[3], 'f32', context)+'}'
 
         if defaultStr.startswith('"') and defaultStr.endswith('"'):
             return defaultStr

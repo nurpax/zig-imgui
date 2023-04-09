@@ -187,10 +187,10 @@ fn SetupRenderState(draw_data: *imgui.DrawData, fb_width: c_int, fb_height: c_in
     // Setup viewport, orthographic projection matrix
     // Our visible imgui space lies from draw_data.DisplayPos (top left) to draw_data.DisplayPos+data_data.DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
     gl.glViewport(0, 0, @intCast(gl.GLsizei, fb_width), @intCast(gl.GLsizei, fb_height));
-    var L = draw_data.DisplayPos.x;
-    var R = draw_data.DisplayPos.x + draw_data.DisplaySize.x;
-    var T = draw_data.DisplayPos.y;
-    var B = draw_data.DisplayPos.y + draw_data.DisplaySize.y;
+    var L = draw_data.DisplayPos[0];
+    var R = draw_data.DisplayPos[0] + draw_data.DisplaySize[0];
+    var T = draw_data.DisplayPos[1];
+    var B = draw_data.DisplayPos[1] + draw_data.DisplaySize[1];
     if (MAY_HAVE_CLIP_ORIGIN and !clip_origin_lower_left) {
         // swap top and bottom if origin is upper left
         const tmp = T;
@@ -259,8 +259,8 @@ fn getGLInts(name: gl.GLenum, comptime N: comptime_int) [N]gl.GLint {
 // This is in order to be able to run within any OpenGL engine that doesn't do so.
 pub fn RenderDrawData(draw_data: *imgui.DrawData) void {
     // Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
-    const fb_width = @floatToInt(c_int, draw_data.DisplaySize.x * draw_data.FramebufferScale.x);
-    const fb_height = @floatToInt(c_int, draw_data.DisplaySize.y * draw_data.FramebufferScale.y);
+    const fb_width = @floatToInt(c_int, draw_data.DisplaySize[0] * draw_data.FramebufferScale[0]);
+    const fb_height = @floatToInt(c_int, draw_data.DisplaySize[1] * draw_data.FramebufferScale[1]);
     if (fb_width <= 0 or fb_height <= 0)
         return;
 
@@ -343,22 +343,22 @@ pub fn RenderDrawData(draw_data: *imgui.DrawData) void {
                 } else {
                     // Project scissor/clipping rectangles into framebuffer space
                     var clip_min = imgui.Vec2{
-                        .x = (pcmd.ClipRect.x - clip_off.x) * clip_scale.x,
-                        .y = (pcmd.ClipRect.y - clip_off.y) * clip_scale.y,
+                        (pcmd.ClipRect[0] - clip_off[0]) * clip_scale[0],
+                        (pcmd.ClipRect[1] - clip_off[1]) * clip_scale[1],
                     };
                     var clip_max = imgui.Vec2{
-                        .x = (pcmd.ClipRect.z - clip_off.x) * clip_scale.x,
-                        .y = (pcmd.ClipRect.w - clip_off.y) * clip_scale.y,
+                        (pcmd.ClipRect[2] - clip_off[0]) * clip_scale[0],
+                        (pcmd.ClipRect[3] - clip_off[1]) * clip_scale[1],
                     };
-                    if (clip_max.x <= clip_min.x or clip_max.y <= clip_min.y)
+                    if (clip_max[0] <= clip_min[0] or clip_max[1] <= clip_min[1])
                         continue;
 
                     // Apply scissor/clipping rectangle (Y is inverted in OpenGL)
                     gl.glScissor(
-                        @floatToInt(c_int, clip_min.x),
-                        fb_height - @floatToInt(c_int, clip_max.y),
-                        @floatToInt(c_int, clip_max.x - clip_min.x),
-                        @floatToInt(c_int, clip_max.y - clip_min.y),
+                        @floatToInt(c_int, clip_min[0]),
+                        fb_height - @floatToInt(c_int, clip_max[1]),
+                        @floatToInt(c_int, clip_max[0] - clip_min[0]),
+                        @floatToInt(c_int, clip_max[1] - clip_min[1]),
                     );
 
                     // Bind texture, Draw

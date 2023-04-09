@@ -25,7 +25,7 @@ const Data = extern struct {
     Time: f64 = 0,
     MouseWindow: ?*glfw.GLFWwindow = null,
     MouseCursors: [imgui.MouseCursor.COUNT]?*glfw.GLFWcursor = [_]?*glfw.GLFWcursor{null} ** imgui.MouseCursor.COUNT,
-    LastValidMousePos: imgui.Vec2 = .{ .x = 0, .y = 0 },
+    LastValidMousePos: imgui.Vec2 = .{ 0, 0 },
     InstalledCallbacks: bool = false,
 
     // Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
@@ -281,7 +281,7 @@ pub fn CursorPosCallback(window: *glfw.GLFWwindow, x: f64, y: f64) callconv(.C) 
 
     const io = imgui.GetIO();
     io.AddMousePosEvent(@floatCast(f32, x), @floatCast(f32, y));
-    bd.LastValidMousePos = .{ .x = @floatCast(f32, x), .y = @floatCast(f32, y) };
+    bd.LastValidMousePos = .{ @floatCast(f32, x), @floatCast(f32, y) };
 }
 
 // Workaround: X11 seems to send spurious Leave/Enter events which would make us lose our position,
@@ -294,7 +294,7 @@ pub fn CursorEnterCallback(window: *glfw.GLFWwindow, entered: i32) callconv(.C) 
     const io = imgui.GetIO();
     if (entered != 0) {
         bd.MouseWindow = window;
-        io.AddMousePosEvent(bd.LastValidMousePos.x, bd.LastValidMousePos.y);
+        io.AddMousePosEvent(bd.LastValidMousePos[0], bd.LastValidMousePos[1]);
     } else if (entered == 0 and bd.MouseWindow == window) {
         bd.LastValidMousePos = io.MousePos;
         bd.MouseWindow = null;
@@ -451,7 +451,7 @@ fn UpdateMouseData() void {
     if (is_app_focused) {
         // (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
         if (io.WantSetMousePos)
-            glfw.glfwSetCursorPos(bd.Window.?, io.MousePos.x, io.MousePos.y);
+            glfw.glfwSetCursorPos(bd.Window.?, io.MousePos[0], io.MousePos[1]);
 
         // (Optional) Fallback to provide mouse position when focused (ImGui_ImplGlfw_CursorPosCallback already provides this when hovered or captured)
         if (is_app_focused and bd.MouseWindow == null) {
@@ -459,7 +459,7 @@ fn UpdateMouseData() void {
             var mouse_y: f64 = 0;
             glfw.glfwGetCursorPos(bd.Window.?, &mouse_x, &mouse_y);
             io.AddMousePosEvent(@floatCast(f32, mouse_x), @floatCast(f32, mouse_y));
-            bd.LastValidMousePos = .{ .x = @floatCast(f32, mouse_x), .y = @floatCast(f32, mouse_y) };
+            bd.LastValidMousePos = .{ @floatCast(f32, mouse_x), @floatCast(f32, mouse_y) };
         }
     }
 }
@@ -565,11 +565,11 @@ pub fn NewFrame() void {
     var display_h: c_int = 0;
     glfw.glfwGetWindowSize(bd.Window.?, &w, &h);
     glfw.glfwGetFramebufferSize(bd.Window.?, &display_w, &display_h);
-    io.DisplaySize = .{ .x = @intToFloat(f32, w), .y = @intToFloat(f32, h) };
+    io.DisplaySize = .{ @intToFloat(f32, w), @intToFloat(f32, h) };
     if (w > 0 and h > 0) {
         io.DisplayFramebufferScale = .{
-            .x = @intToFloat(f32, display_w) / @intToFloat(f32, w),
-            .y = @intToFloat(f32, display_h) / @intToFloat(f32, h),
+            @intToFloat(f32, display_w) / @intToFloat(f32, w),
+            @intToFloat(f32, display_h) / @intToFloat(f32, h),
         };
     }
 

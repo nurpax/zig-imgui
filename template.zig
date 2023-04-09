@@ -318,33 +318,8 @@ pub fn Vector(comptime T: type) type {
     };
 }
 
-pub const Vec2 = extern struct {
-    x: f32 = 0,
-    y: f32 = 0,
-
-    pub fn init(x: f32, y: f32) Vec2 {
-        return .{ .x = x, .y = y };
-    }
-
-    pub fn eql(self: Vec2, other: Vec2) bool {
-        return self.x == other.x and self.y == other.y;
-    }
-};
-
-pub const Vec4 = extern struct {
-    x: f32 = 0,
-    y: f32 = 0,
-    z: f32 = 0,
-    w: f32 = 0,
-
-    pub fn init(x: f32, y: f32, z: f32, w: f32) Vec4 {
-        return .{ .x = x, .y = y, .z = z, .w = w };
-    }
-
-    pub fn eql(self: Vec4, other: Vec4) bool {
-        return self.x == other.x and self.y == other.y and self.z == other.z and self.w == other.w;
-    }
-};
+pub const Vec2 = @Vector(2, f32);
+pub const Vec4 = @Vector(4, f32);
 
 pub const Color = extern struct {
     Value: Vec4,

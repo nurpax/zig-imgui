@@ -14,7 +14,7 @@ const imgui = @import("imgui");
 var pass_action: sg.PassAction = .{};
 var show_another_window = false;
 var slider_value: f32 = 0;
-var clear_color = imgui.Vec4{ .x = 0.45, .y = 0.55, .z = 0.60, .w = 1.00 };
+var clear_color = imgui.Vec4{ 0.45, 0.55, 0.60, 1.00 };
 var counter: u32 = 0;
 
 export fn init() void {
