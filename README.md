@@ -1,5 +1,9 @@
 # Zig-ImGui
 
+Note: nurpax/zig-imgui is a fork of [github.com/SpexGuy/Zig-ImGui](https://github.com/SpexGuy/Zig-ImGui) via [github.com/ryansname/Zig-ImGui](https://github.com/ryansname/Zig-ImGui).  This version updates Dear ImGui to 1.89.4 which required some changes to bindings generation.  Zig code is also updated to work on the latest Zig dev version (0.11.x).
+
+Rest of the file is from the original README.
+
 Zig-ImGui uses [cimgui](https://github.com/cimgui/cimgui) to generate [Zig](https://github.com/ziglang/zig) bindings for [Dear ImGui](https://github.com/ocornut/imgui).
 
 It is currently up to date with [Dear ImGui v1.88](https://github.com/ocornut/imgui/tree/v1.88).
