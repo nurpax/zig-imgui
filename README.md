@@ -2,6 +2,16 @@
 
 Note: nurpax/zig-imgui is a fork of [github.com/SpexGuy/Zig-ImGui](https://github.com/SpexGuy/Zig-ImGui) via [github.com/ryansname/Zig-ImGui](https://github.com/ryansname/Zig-ImGui).  This version updates Dear ImGui to 1.89.4 which required some changes to bindings generation.  Zig code is also updated to work on the latest Zig dev version (0.11.x).
 
+This fork adds a Sokol app/gfx backend using [sokol_imgui.h](https://github.com/floooh/sokol/blob/master/util/sokol_imgui.h).  To build it and run it, do: 
+
+```
+zig build example_sokol_app
+```
+
+I plan on using this code in my own projects.  Sharing the code as-is in case it's helpful to someone.
+
+...
+
 Rest of the file is from the original README.
 
 Zig-ImGui uses [cimgui](https://github.com/cimgui/cimgui) to generate [Zig](https://github.com/ziglang/zig) bindings for [Dear ImGui](https://github.com/ocornut/imgui).
