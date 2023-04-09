@@ -6,7 +6,12 @@ const LibExeObjStep = std.build.LibExeObjStep;
 
 const imgui_build = @import("zig-imgui/imgui_build.zig");
 
-const glslc_command = if (builtin.os.tag == .windows) "tools/win/glslc.exe" else "glslc";
+// @src() is only allowed inside of a function, so we need this wrapper
+fn srcFile() []const u8 {
+    return @src().file;
+}
+const sep = std.fs.path.sep_str;
+const sokol_imgui_root_path = std.fs.path.dirname(srcFile()).?;
 
 pub fn build(b: *Builder) void {
     const target = b.standardTargetOptions(.{});
@@ -26,7 +31,7 @@ pub fn build(b: *Builder) void {
     }
     {
         const exe = exampleExe(b, "example_sokol_app", optimize, target);
-        linkSokol(exe, target);
+        linkSokolImgui(exe, target);
     }
 }
 
@@ -34,9 +39,6 @@ fn exampleExe(b: *Builder, comptime name: []const u8, optimize: std.builtin.Mode
     const exe = b.addExecutable(.{ .name = name, .target = target, .optimize = optimize, .root_source_file = .{ .path = "examples/" ++ name ++ ".zig" } });
     imgui_build.link(exe);
     exe.install();
-
-    exe.addAnonymousModule("imgui", .{ .source_file = .{ .path = "zig-imgui/imgui.zig" } });
-    exe.addAnonymousModule("sokol", .{ .source_file = .{ .path = "sokol/sokol.zig" } });
 
     const run_step = b.step(name, "Run " ++ name);
     const run_cmd = exe.run();
@@ -70,23 +72,28 @@ fn linkVulkan(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
     }
 }
 
-fn linkSokol(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
+pub fn linkSokolImgui(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
     _ = target;
 
-    exe.addIncludePath("zig-imgui");
-    exe.addIncludePath("sokol");
+    const base = sokol_imgui_root_path ++ sep;
+    exe.addIncludePath(base ++ "zig-imgui");
+    exe.addIncludePath(base ++ "sokol");
+    exe.addAnonymousModule("sokol", .{ .source_file = .{
+        .path = base ++ "sokol/sokol.zig",
+    } });
+    imgui_build.link(exe);
 
     const csources = [_][]const u8{
-        "sokol/c/sokol_app.c",
-        "sokol/c/sokol_gfx.c",
-        "sokol/c/sokol_time.c",
-        "sokol/c/sokol_audio.c",
-        "sokol/c/sokol_gl.c",
-        "sokol/c/sokol_debugtext.c",
-        "sokol/c/sokol_shape.c",
-        "sokol/c/sokol_log.c",
-        "sokol/c/sokol_imgui.cpp",
-        "sokol/imgui_wrapper.c",
+        base ++ "sokol/c/sokol_app.c",
+        base ++ "sokol/c/sokol_gfx.c",
+        base ++ "sokol/c/sokol_time.c",
+        base ++ "sokol/c/sokol_audio.c",
+        base ++ "sokol/c/sokol_gl.c",
+        base ++ "sokol/c/sokol_debugtext.c",
+        base ++ "sokol/c/sokol_shape.c",
+        base ++ "sokol/c/sokol_log.c",
+        base ++ "sokol/c/sokol_imgui.cpp",
+        base ++ "sokol/imgui_wrapper.c",
     };
     //const backend = if (lib.target.isDarwin()) .metal else if (lib.target.isWindows()) .d3d11 else .gl;
     const backend = .d3d11;
