@@ -78,6 +78,7 @@ pub fn linkSokolImgui(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
     const base = sokol_imgui_root_path ++ sep;
     exe.addIncludePath(base ++ "zig-imgui");
     exe.addIncludePath(base ++ "sokol");
+    exe.addIncludePath(base ++ "sokol/c");
     exe.addAnonymousModule("sokol", .{ .source_file = .{
         .path = base ++ "sokol/sokol.zig",
     } });
