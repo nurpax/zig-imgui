@@ -10,6 +10,19 @@ zig build example_sokol_app
 
 I plan on using this code in my own projects.  Sharing the code as-is in case it's helpful to someone.
 
+## To use it in your own project (sokol & imgui)
+
+1. Copy the whole zig-imgui repo under a directory in your project (f.ex. with git subtree).  
+2. Link sokol and imgui into your project using `linkSokolImgui()` in your project's build.zig:
+
+```
+const sokol_imgui = @import("path/to/zig-imgui/build.zig");
+...
+sokol_imgui.linkSokolImgui(step, target);
+const exe = b.addExecutable(...);
+sokol_imgui.linkSokolImgui(exe, target);
+```
+
 ...
 
 Rest of the file is from the original README.
