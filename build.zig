@@ -6,6 +6,16 @@ const LibExeObjStep = std.build.LibExeObjStep;
 
 const imgui_build = @import("zig-imgui/imgui_build.zig");
 
+pub const Backend = enum {
+    auto, // Windows: D3D11, macOS/iOS: Metal, otherwise: GL
+    d3d11,
+    metal,
+    gl,
+    gles2,
+    gles3,
+    wgpu,
+};
+
 // @src() is only allowed inside of a function, so we need this wrapper
 fn srcFile() []const u8 {
     return @src().file;
@@ -21,23 +31,24 @@ pub fn build(b: *Builder) void {
 
     {
         const exe = exampleExe(b, "example_glfw_vulkan", optimize, target);
+        imgui_build.link(exe);
         linkGlfw(exe, target);
         linkVulkan(exe, target);
     }
     {
         const exe = exampleExe(b, "example_glfw_opengl3", optimize, target);
+        imgui_build.link(exe);
         linkGlfw(exe, target);
         linkGlad(exe, target);
     }
     {
         const exe = exampleExe(b, "example_sokol_app", optimize, target);
-        linkSokolImgui(exe, target);
+        linkSokolImgui(exe);
     }
 }
 
 fn exampleExe(b: *Builder, comptime name: []const u8, optimize: std.builtin.Mode, target: std.zig.CrossTarget) *LibExeObjStep {
     const exe = b.addExecutable(.{ .name = name, .target = target, .optimize = optimize, .root_source_file = .{ .path = "examples/" ++ name ++ ".zig" } });
-    imgui_build.link(exe);
     exe.install();
 
     const run_step = b.step(name, "Run " ++ name);
@@ -72,9 +83,7 @@ fn linkVulkan(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
     }
 }
 
-pub fn linkSokolImgui(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
-    _ = target;
-
+pub fn linkSokolImgui(exe: *LibExeObjStep) void {
     const base = sokol_imgui_root_path ++ sep;
     exe.addIncludePath(base ++ "zig-imgui");
     exe.addIncludePath(base ++ "sokol");
@@ -96,9 +105,7 @@ pub fn linkSokolImgui(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
         base ++ "sokol/c/sokol_imgui.cpp",
         base ++ "sokol/imgui_wrapper.c",
     };
-    //const backend = if (lib.target.isDarwin()) .metal else if (lib.target.isWindows()) .d3d11 else .gl;
-    const backend = .d3d11;
-    std.debug.assert(exe.target.isWindows());
+    const backend: Backend = if (exe.target.isDarwin()) .metal else if (exe.target.isWindows()) .d3d11 else .gl;
     const backend_option = switch (backend) {
         .d3d11 => "-DSOKOL_D3D11",
         .metal => "-DSOKOL_METAL",
@@ -109,7 +116,7 @@ pub fn linkSokolImgui(exe: *LibExeObjStep, target: std.zig.CrossTarget) void {
         else => unreachable,
     };
 
-    for (csources) |csrc| {
+    inline for (csources) |csrc| {
         exe.addCSourceFile(csrc, &[_][]const u8{ "-DIMPL", backend_option });
     }
     if (exe.target.isLinux()) {
