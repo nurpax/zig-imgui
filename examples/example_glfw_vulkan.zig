@@ -98,7 +98,7 @@ fn SetupVulkan(extensions: []const [*:0]const u8, allocator: std.mem.Allocator) 
         // If a number >1 of GPUs got reported, find discrete GPU if present, or use first one available. This covers
         // most common cases (multi-gpu/integrated+dedicated graphics). Handling more complicated setups (multiple
         // dedicated GPUs) is out of scope of this sample.
-        const use_gpu = for (gpus) |gpu, i| {
+        const use_gpu = for (gpus, 0..) |gpu, i| {
             const properties = vk.GetPhysicalDeviceProperties(gpu);
             if (properties.deviceType == .DISCRETE_GPU) break i;
         } else 0;
@@ -111,7 +111,7 @@ fn SetupVulkan(extensions: []const [*:0]const u8, allocator: std.mem.Allocator) 
         var queues = try allocator.alloc(vk.QueueFamilyProperties, count);
         defer allocator.free(queues);
         _ = vk.GetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, queues);
-        for (queues) |queue, i| {
+        for (queues, 0..) |queue, i| {
             if (queue.queueFlags.graphics) {
                 g_QueueFamily = @intCast(u32, i);
                 break;

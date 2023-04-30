@@ -260,14 +260,15 @@ const __glsl_shader_frag_spv = [_]u32{
 fn GetBackendData() ?*Data {
     return if (imgui.GetCurrentContext() != null)
         @ptrCast(?*Data, @alignCast(@alignOf(Data), imgui.GetIO().BackendRendererUserData))
-    else null;
+    else
+        null;
 }
 
 fn MemoryType(properties: vk.MemoryPropertyFlags, type_bits: u32) ?u32 {
     const bd = GetBackendData().?;
     var v = &bd.VulkanInitInfo;
     var prop = vk.GetPhysicalDeviceMemoryProperties(v.PhysicalDevice);
-    for (prop.memoryTypes[0..prop.memoryTypeCount]) |memType, i|
+    for (prop.memoryTypes[0..prop.memoryTypeCount], 0..) |memType, i|
         if (memType.propertyFlags.hasAllSet(properties) and type_bits & (@as(u32, 1) << @intCast(u5, i)) != 0)
             return @intCast(u32, i);
     return null; // Unable to find memoryType
@@ -1062,7 +1063,7 @@ pub fn AddTexture(sampler: vk.Sampler, image_view: vk.ImageView, image_layout: v
     const bd = GetBackendData().?;
     const v = &bd.VulkanInitInfo;
 
-    var descriptor_sets: [1]vk.DescriptorSet = .{ .Null };
+    var descriptor_sets: [1]vk.DescriptorSet = .{.Null};
     try vk.AllocateDescriptorSets(v.Device, .{
         .descriptorPool = v.DescriptorPool,
         .descriptorSetCount = 1,
@@ -1287,7 +1288,7 @@ fn CreateWindowSwapChain(physical_device: vk.PhysicalDevice, device: vk.Device, 
         wd.Frames = try wd.Allocator.alloc(Frame, wd.ImageCount);
         wd.FrameSemaphores = try wd.Allocator.alloc(FrameSemaphores, wd.ImageCount);
 
-        for (wd.Frames) |*frame, i| frame.* = Frame{ .Backbuffer = imagesResult.swapchainImages[i] };
+        for (wd.Frames, 0..) |*frame, i| frame.* = Frame{ .Backbuffer = imagesResult.swapchainImages[i] };
         for (wd.FrameSemaphores) |*fs| fs.* = FrameSemaphores{};
     }
     if (old_swapchain != .Null)
@@ -1393,7 +1394,7 @@ pub fn DestroyWindow(instance: vk.Instance, device: vk.Device, wd: *Window, allo
     try vk.DeviceWaitIdle(device); // FIXME: We could wait on the Queue if we had the queue in wd. (otherwise VulkanH functions can't use globals)
     //vk.QueueWaitIdle(bd.Queue);
 
-    for (wd.Frames) |_, i| {
+    for (wd.Frames, 0..) |_, i| {
         DestroyFrame(device, &wd.Frames[i], allocator);
         DestroyFrameSemaphores(device, &wd.FrameSemaphores[i], allocator);
     }
