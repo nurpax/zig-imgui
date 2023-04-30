@@ -49,10 +49,11 @@ pub fn build(b: *Builder) void {
 
 fn exampleExe(b: *Builder, comptime name: []const u8, optimize: std.builtin.Mode, target: std.zig.CrossTarget) *LibExeObjStep {
     const exe = b.addExecutable(.{ .name = name, .target = target, .optimize = optimize, .root_source_file = .{ .path = "examples/" ++ name ++ ".zig" } });
-    exe.install();
+    b.installArtifact(exe);
 
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
     const run_step = b.step(name, "Run " ++ name);
-    const run_cmd = exe.run();
     run_step.dependOn(&run_cmd.step);
 
     return exe;

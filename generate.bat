@@ -20,7 +20,8 @@ where python || goto NO_PYTHON
 
 :PYTHON_GENERATE
 	@echo Generating Zig Bindings...
-	python3 "%~dp0\generate.py"
+	python "%~dp0\generate.py"
+	zig fmt zig-imgui\imgui.zig
 
 :VENDOR_IMGUI
 	pushd "%~dp0"
