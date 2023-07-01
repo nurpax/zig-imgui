@@ -29,18 +29,18 @@ pub fn build(b: *Builder) void {
 
     imgui_build.addTestStep(b, "test", optimize, target);
 
-    {
-        const exe = exampleExe(b, "example_glfw_vulkan", optimize, target);
-        imgui_build.link(exe);
-        linkGlfw(exe, target);
-        linkVulkan(exe, target);
-    }
-    {
-        const exe = exampleExe(b, "example_glfw_opengl3", optimize, target);
-        imgui_build.link(exe);
-        linkGlfw(exe, target);
-        linkGlad(exe, target);
-    }
+    // {
+    //     const exe = exampleExe(b, "example_glfw_vulkan", optimize, target);
+    //     imgui_build.link(exe);
+    //     linkGlfw(exe, target);
+    //     linkVulkan(exe, target);
+    // }
+    // {
+    //     const exe = exampleExe(b, "example_glfw_opengl3", optimize, target);
+    //     imgui_build.link(exe);
+    //     linkGlfw(exe, target);
+    //     linkGlad(exe, target);
+    // }
     {
         const exe = exampleExe(b, "example_sokol_app", optimize, target);
         linkSokolImgui(exe);

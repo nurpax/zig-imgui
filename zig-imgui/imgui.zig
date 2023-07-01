@@ -8,7 +8,7 @@ const builtin = @import("builtin");
 const assert = @import("std").debug.assert;
 const imgui = @This();
 
-pub const DrawCallback_ResetRenderState = @intToPtr(DrawCallback, ~@as(usize, 3));
+pub const DrawCallback_ResetRenderState: DrawCallback = @ptrFromInt(~@as(usize, 3));
 
 pub const VERSION = "1.89.4";
 pub fn CHECKVERSION() void {
@@ -17,8 +17,8 @@ pub fn CHECKVERSION() void {
     }
 }
 
-pub const FLT_MAX: f32 = @bitCast(f32, @as(u32, 0x7F7FFFFF));
-pub const FLT_MIN: f32 = @bitCast(f32, @as(u32, 0x00800000));
+pub const FLT_MAX: f32 = @bitCast(@as(u32, 0x7F7FFFFF));
+pub const FLT_MIN: f32 = @bitCast(@as(u32, 0x00800000));
 
 pub const FlagsInt = u32;
 
@@ -26,10 +26,10 @@ pub fn FlagsMixin(comptime FlagType: type) type {
     comptime assert(@sizeOf(FlagType) == 4);
     return struct {
         pub fn toInt(self: FlagType) FlagsInt {
-            return @bitCast(FlagsInt, self);
+            return @bitCast(self);
         }
         pub fn fromInt(value: FlagsInt) FlagType {
-            return @bitCast(FlagType, value);
+            return @bitCast(value);
         }
         pub fn with(a: FlagType, b: FlagType) FlagType {
             return fromInt(toInt(a) | toInt(b));
@@ -83,7 +83,7 @@ pub fn Vector(comptime T: type) type {
 
         // Constructors, destructor
         pub fn deinit(self: *@This()) void {
-            if (self.Data) |d| raw.igMemFree(@ptrCast(*anyopaque, d));
+            if (self.Data) |d| raw.igMemFree(@ptrCast(d));
             self.* = undefined;
         }
 
@@ -91,7 +91,7 @@ pub fn Vector(comptime T: type) type {
             var cloned = @This(){};
             if (self.Size != 0) {
                 cloned.resize_undefined(self.Size);
-                @memcpy(@ptrCast([*]T, cloned.Data.?)[0..self.Size], @ptrCast([*]const T, self.Data.?));
+                @memcpy(@as([*]T, @ptrCast(cloned.Data.?))[0..self.Size], @as([*]const T, @ptrCast(self.Data.?)));
             }
             return cloned;
         }
@@ -100,22 +100,22 @@ pub fn Vector(comptime T: type) type {
             self.Size = 0;
             if (other.Size != 0) {
                 self.resize_undefined(other.Size);
-                @memcpy(@ptrCast([*]T, self.Data.?)[0..self.Size], @ptrCast([*]const T, other.Data.?));
+                @memcpy(@as([*]T, @ptrCast(self.Data.?))[0..self.Size], @as([*]const T, @ptrCast(other.Data.?)));
             }
         }
 
         pub fn from_slice(slice: []const T) @This() {
             var result = @This(){};
             if (slice.len != 0) {
-                result.resize_undefined(@intCast(u32, slice.len));
-                @memcpy(@ptrCast([*]T, result.Data.?)[0..slice.len], @ptrCast([*]const T, slice.ptr));
+                result.resize_undefined(@intCast(slice.len));
+                @memcpy(@as([*]T, @ptrCast(result.Data.?))[0..slice.len], @as([*]const T, @ptrCast(slice.ptr)));
             }
             return result;
         }
 
         /// Important: does not destruct anything
         pub fn clear(self: *@This()) void {
-            if (self.Data) |d| raw.igMemFree(@ptrCast(?*anyopaque, d));
+            if (self.Data) |d| raw.igMemFree(@ptrCast(d));
             self.* = .{};
         }
 
@@ -141,7 +141,7 @@ pub fn Vector(comptime T: type) type {
                 for (self.items()) |_ptr| {
                     const ptr: *ValueT = _ptr;
                     destruct(ValueT, ptr);
-                    raw.igMemFree(@ptrCast(?*anyopaque, ptr));
+                    raw.igMemFree(@ptrCast(ptr));
                 }
             }
             self.clear();
@@ -199,20 +199,20 @@ pub fn Vector(comptime T: type) type {
         }
         pub fn reserve(self: *@This(), new_capacity: u32) void {
             if (new_capacity <= self.Capacity) return;
-            const new_data = @ptrCast(?[*]T, @alignCast(@alignOf(T), raw.igMemAlloc(new_capacity * @sizeOf(T))));
+            const new_data: ?[*]T = @ptrCast(@alignCast(raw.igMemAlloc(new_capacity * @sizeOf(T))));
             if (self.Data) |sd| {
                 if (self.Size != 0) {
-                    @memcpy(@ptrCast([*]T, new_data.?)[0..self.Size], @ptrCast([*]const T, sd));
+                    @memcpy(@as([*]T, @ptrCast(new_data.?))[0..self.Size], @as([*]const T, @ptrCast(sd)));
                 }
-                raw.igMemFree(@ptrCast(*anyopaque, sd));
+                raw.igMemFree(@ptrCast(sd));
             }
             self.Data = new_data;
             self.Capacity = new_capacity;
         }
         pub fn reserve_discard(self: *@This(), new_capacity: u32) void {
             if (new_capacity <= self.Capacity) return;
-            if (self.Data) |sd| raw.igMemFree(@ptrCast(*anyopaque, sd));
-            self.Data = @ptrCast(?[*]T, @alignCast(@alignOf(T), raw.igMemAlloc(new_capacity * @sizeOf(T))));
+            if (self.Data) |sd| raw.igMemFree(@ptrCast(sd));
+            self.Data = @ptrCast(@alignCast(raw.igMemAlloc(new_capacity * @sizeOf(T))));
             self.Capacity = new_capacity;
         }
 
@@ -288,7 +288,7 @@ pub fn Vector(comptime T: type) type {
         }
         pub fn find(self: @This(), v: T) ?u32 {
             return for (self.items(), 0..) |*it, i| {
-                if (imgui.eql(T, v, it.*)) break @intCast(u32, i);
+                if (imgui.eql(T, v, it.*)) break @intCast(i);
             } else null;
         }
         pub fn find_erase(self: *@This(), v: T) bool {
@@ -359,18 +359,18 @@ pub const Color = extern struct {
     pub fn initRGBAUnorm(r: u8, g: u8, b: u8, a: u8) Color {
         const inv_255: f32 = 1.0 / 255.0;
         return initRGBA(
-            @intToFloat(f32, r) * inv_255,
-            @intToFloat(f32, g) * inv_255,
-            @intToFloat(f32, b) * inv_255,
-            @intToFloat(f32, a) * inv_255,
+            @as(f32, @floatFromInt(r)) * inv_255,
+            @as(f32, @floatFromInt(g)) * inv_255,
+            @as(f32, @floatFromInt(b)) * inv_255,
+            @as(f32, @floatFromInt(a)) * inv_255,
         );
     }
     pub fn initRGBUnorm(r: u8, g: u8, b: u8) Color {
         const inv_255: f32 = 1.0 / 255.0;
         return initRGBA(
-            @intToFloat(f32, r) * inv_255,
-            @intToFloat(f32, g) * inv_255,
-            @intToFloat(f32, b) * inv_255,
+            @as(f32, @floatFromInt(r)) * inv_255,
+            @as(f32, @floatFromInt(g)) * inv_255,
+            @as(f32, @floatFromInt(b)) * inv_255,
             1.0,
         );
     }
@@ -390,10 +390,10 @@ pub const Color = extern struct {
     /// Convert an integer 0xaabbggrr to a floating point color
     pub fn initABGRPacked(value: u32) Color {
         return initRGBAUnorm(
-            @truncate(u8, value >> 0),
-            @truncate(u8, value >> 8),
-            @truncate(u8, value >> 16),
-            @truncate(u8, value >> 24),
+            @truncate(value >> 0),
+            @truncate(value >> 8),
+            @truncate(value >> 16),
+            @truncate(value >> 24),
         );
     }
     /// Convert from a floating point color to an integer 0xaabbggrr
@@ -410,7 +410,7 @@ fn imguiZigAlloc(_: *anyopaque, len: usize, ptr_align: u29, len_align: u29, ret_
     _ = len_align;
     _ = ret_addr;
     assert(ptr_align <= @alignOf(*anyopaque)); // Alignment larger than pointers is not supported
-    return @ptrCast([*]u8, raw.igMemAlloc(len) orelse return error.OutOfMemory)[0..len];
+    return @as([*]u8, @ptrCast(raw.igMemAlloc(len) orelse return error.OutOfMemory))[0..len];
 }
 fn imguiZigResize(_: *anyopaque, buf: []u8, buf_align: u29, new_len: usize, len_align: u29, ret_addr: usize) ?usize {
     _ = len_align;
