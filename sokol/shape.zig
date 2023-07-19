@@ -5,7 +5,7 @@ const sg = @import("gfx.zig");
 
 // helper function to convert a C string to a Zig string slice
 fn cStrToZig(c_str: [*c]const u8) [:0]const u8 {
-  return @import("std").mem.span(c_str);
+    return @import("std").mem.span(c_str);
 }
 // helper function to convert "anything" to a Range struct
 pub fn asRange(val: anytype) Range {
@@ -23,7 +23,7 @@ pub fn asRange(val: anytype) Range {
         },
         else => {
             @compileError("Cannot convert to range!");
-        }
+        },
     }
 }
 
@@ -32,7 +32,7 @@ pub const Range = extern struct {
     size: usize = 0,
 };
 pub const Mat4 = extern struct {
-    m: [4][4]f32 = [_][4]f32{[_]f32{ 0.0 }**4}**4,
+    m: [4][4]f32 = [_][4]f32{[_]f32{0.0} ** 4} ** 4,
 };
 pub const Vertex = extern struct {
     x: f32 = 0.0,
@@ -54,18 +54,18 @@ pub const SizesItem = extern struct {
     __pad: [3]u32 = [_]u32{0} ** 3,
 };
 pub const Sizes = extern struct {
-    vertices: SizesItem = .{ },
-    indices: SizesItem = .{ },
+    vertices: SizesItem = .{},
+    indices: SizesItem = .{},
 };
 pub const BufferItem = extern struct {
-    buffer: Range = .{ },
+    buffer: Range = .{},
     data_size: usize = 0,
     shape_offset: usize = 0,
 };
 pub const Buffer = extern struct {
     valid: bool = false,
-    vertices: BufferItem = .{ },
-    indices: BufferItem = .{ },
+    vertices: BufferItem = .{},
+    indices: BufferItem = .{},
 };
 pub const Plane = extern struct {
     width: f32 = 0.0,
@@ -74,7 +74,7 @@ pub const Plane = extern struct {
     color: u32 = 0,
     random_colors: bool = false,
     merge: bool = false,
-    transform: Mat4 = .{ },
+    transform: Mat4 = .{},
 };
 pub const Box = extern struct {
     width: f32 = 0.0,
@@ -84,7 +84,7 @@ pub const Box = extern struct {
     color: u32 = 0,
     random_colors: bool = false,
     merge: bool = false,
-    transform: Mat4 = .{ },
+    transform: Mat4 = .{},
 };
 pub const Sphere = extern struct {
     radius: f32 = 0.0,
@@ -93,7 +93,7 @@ pub const Sphere = extern struct {
     color: u32 = 0,
     random_colors: bool = false,
     merge: bool = false,
-    transform: Mat4 = .{ },
+    transform: Mat4 = .{},
 };
 pub const Cylinder = extern struct {
     radius: f32 = 0.0,
@@ -103,7 +103,7 @@ pub const Cylinder = extern struct {
     color: u32 = 0,
     random_colors: bool = false,
     merge: bool = false,
-    transform: Mat4 = .{ },
+    transform: Mat4 = .{},
 };
 pub const Torus = extern struct {
     radius: f32 = 0.0,
@@ -113,7 +113,7 @@ pub const Torus = extern struct {
     color: u32 = 0,
     random_colors: bool = false,
     merge: bool = false,
-    transform: Mat4 = .{ },
+    transform: Mat4 = .{},
 };
 pub extern fn sshape_build_plane([*c]const Buffer, [*c]const Plane) Buffer;
 pub fn buildPlane(buf: Buffer, params: Plane) Buffer {
@@ -167,25 +167,25 @@ pub extern fn sshape_index_buffer_desc([*c]const Buffer) sg.BufferDesc;
 pub fn indexBufferDesc(buf: Buffer) sg.BufferDesc {
     return sshape_index_buffer_desc(&buf);
 }
-pub extern fn sshape_buffer_layout_desc() sg.BufferLayoutDesc;
-pub fn bufferLayoutDesc() sg.BufferLayoutDesc {
-    return sshape_buffer_layout_desc();
+pub extern fn sshape_vertex_buffer_layout_state() sg.VertexBufferLayoutState;
+pub fn vertexBufferLayoutState() sg.VertexBufferLayoutState {
+    return sshape_vertex_buffer_layout_state();
 }
-pub extern fn sshape_position_attr_desc() sg.VertexAttrDesc;
-pub fn positionAttrDesc() sg.VertexAttrDesc {
-    return sshape_position_attr_desc();
+pub extern fn sshape_position_vertex_attr_state() sg.VertexAttrState;
+pub fn positionVertexAttrState() sg.VertexAttrState {
+    return sshape_position_vertex_attr_state();
 }
-pub extern fn sshape_normal_attr_desc() sg.VertexAttrDesc;
-pub fn normalAttrDesc() sg.VertexAttrDesc {
-    return sshape_normal_attr_desc();
+pub extern fn sshape_normal_vertex_attr_state() sg.VertexAttrState;
+pub fn normalVertexAttrState() sg.VertexAttrState {
+    return sshape_normal_vertex_attr_state();
 }
-pub extern fn sshape_texcoord_attr_desc() sg.VertexAttrDesc;
-pub fn texcoordAttrDesc() sg.VertexAttrDesc {
-    return sshape_texcoord_attr_desc();
+pub extern fn sshape_texcoord_vertex_attr_state() sg.VertexAttrState;
+pub fn texcoordVertexAttrState() sg.VertexAttrState {
+    return sshape_texcoord_vertex_attr_state();
 }
-pub extern fn sshape_color_attr_desc() sg.VertexAttrDesc;
-pub fn colorAttrDesc() sg.VertexAttrDesc {
-    return sshape_color_attr_desc();
+pub extern fn sshape_color_vertex_attr_state() sg.VertexAttrState;
+pub fn colorVertexAttrState() sg.VertexAttrState {
+    return sshape_color_vertex_attr_state();
 }
 pub extern fn sshape_color_4f(f32, f32, f32, f32) u32;
 pub fn color4f(r: f32, g: f32, b: f32, a: f32) u32 {

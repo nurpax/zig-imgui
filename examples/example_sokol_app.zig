@@ -19,7 +19,7 @@ var counter: u32 = 0;
 
 export fn init() void {
     sg.setup(.{ .context = sgapp.context(), .logger = .{ .func = slog.func } });
-    pass_action.colors[0] = .{ .action = .CLEAR, .value = .{ .r = 0, .g = 0, .b = 0, .a = 1 } };
+    pass_action.colors[0] = .{ .load_action = .CLEAR, .clear_value = .{ .r = 0, .g = 0, .b = 0, .a = 1 } };
     print("Backend: {}\n", .{sg.queryBackend()});
 
     sokol.imgui.setup();
@@ -41,7 +41,7 @@ export fn frame() void {
         _ = imgui.Checkbox("Another Window", &show_another_window);
 
         _ = imgui.SliderFloat("float", &slider_value, 0.0, 1.0); // Edit 1 float using a slider from 0.0 to 1.0
-        _ = imgui.ColorEdit3("clear color", @ptrCast(*[3]f32, &clear_color)); // Edit 3 floats representing a color
+        _ = imgui.ColorEdit3("clear color", @ptrCast(&clear_color)); // Edit 3 floats representing a color
 
         if (imgui.Button("Button")) { // Buttons return true when clicked (most widgets return true when edited/activated)
             counter += 1;
